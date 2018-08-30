@@ -13,20 +13,21 @@
 
 + (UIImage *)fb_imageForLayer:(CALayer *)layer
 {
-  CGRect bounds = layer.bounds;
-  NSAssert1(CGRectGetWidth(bounds), @"Zero width for layer %@", layer);
-  NSAssert1(CGRectGetHeight(bounds), @"Zero height for layer %@", layer);
-
-  UIGraphicsBeginImageContextWithOptions(bounds.size, NO, 0);
-  CGContextRef context = UIGraphicsGetCurrentContext();
-  NSAssert1(context, @"Could not generate context for layer %@", layer);
-  CGContextSaveGState(context);
   [layer layoutIfNeeded];
-  [layer renderInContext:context];
-  CGContextRestoreGState(context);
-
+  UIView *view = [[UIView alloc] initWithFrame:layer.bounds];
+  view.backgroundColor = [UIColor clearColor];
+  [view.layer addSublayer:layer];
+  
+  CGRect bounds = view.bounds;
+  NSAssert1(CGRectGetWidth(bounds), @"Zero width for view %@", view);
+  NSAssert1(CGRectGetHeight(bounds), @"Zero height for view %@", view);
+  
+  UIGraphicsBeginImageContextWithOptions(bounds.size, NO, 0);
+  [view drawViewHierarchyInRect:view.bounds afterScreenUpdates:YES];
+  
   UIImage *snapshot = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
+  
   return snapshot;
 }
 
